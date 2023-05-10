@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GatewayConfig } from 'src/configs/gateway_config';
-import { WooRestApiEndpoint, WooRestApiParams } from 'woocommerce-rest-ts-api';
+import { WooRestApiEndpoint } from 'woocommerce-rest-ts-api';
 @Injectable()
 export class GatewayService {
   private endPoint = GatewayConfig.End_point;
@@ -15,14 +15,23 @@ export class GatewayService {
   create(path: WooRestApiEndpoint, item: any) {
     return this.endPoint.post(path, item);
   }
-  delete(
-    path: WooRestApiEndpoint,
-    id: number,
-    option?: Pick<WooRestApiParams, 'force'>,
-  ) {
-    return this.endPoint.delete(path, option, {
-      id: id,
-    });
+  deleteForce(path: WooRestApiEndpoint, id: number) {
+    return this.endPoint.delete(
+      path,
+      { force: true },
+      {
+        id: id,
+      },
+    );
+  }
+  unDeleteForce(path: WooRestApiEndpoint, id: number) {
+    return this.endPoint.delete(
+      path,
+      { force: false },
+      {
+        id: id,
+      },
+    );
   }
   update(path: WooRestApiEndpoint, id: number, data: any) {
     return this.endPoint.put(path, data, {

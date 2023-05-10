@@ -14,8 +14,12 @@ export class ProductService {
     }
   }
   async findById(id: number) {
-    const result = await this.gateway.getById('products', id);
-    return result.data;
+    try {
+      const result = await this.gateway.getById('products', id);
+      return result.data;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
   async create(data: Products) {
     try {
@@ -25,9 +29,9 @@ export class ProductService {
       throw new BadRequestException(error);
     }
   }
-  async delete(id: number) {
+  async deleteY(id: number) {
     try {
-      const result = await this.gateway.delete('products', id);
+      const result = await this.gateway.deleteForce('products', id);
       return result.data;
     } catch (error) {
       throw new BadRequestException(error);
@@ -35,8 +39,12 @@ export class ProductService {
   }
   async update(id: number, data: Products) {
     try {
-      const update = this.gateway.update('products', id, data);
-      return update;
+      const products = await this.findById(id);
+      if (!products) {
+        throw new BadRequestException('is not Product in Database');
+      }
+      const update = await this.gateway.update('products', id, data);
+      return update.data;
     } catch (error) {
       throw new BadRequestException(error);
     }
