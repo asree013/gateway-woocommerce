@@ -1,15 +1,29 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { GatewayService } from '../gateway/gateway.service';
 import { Orders } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { CachingService } from '../caching/caching.service';
 
 @Injectable()
 export class OrderService {
-  constructor(@Inject('gateway') private readonly gateway: GatewayService) {}
-  async getOrderAll() {
-    const result = await this.gateway.getAll('orders');
-    return result.data;
+  constructor(
+    @Inject('gateway') private readonly gateway: GatewayService,
+    @Inject('caching') private readonly caches: CachingService,
+  ) {}
+  async findAll() {
+    try {
+      const result: Orders[] | undefined = JSON.parse(
+        await this.caches.getRedisOrders(),
+      );
+      if (!result) {
+        const result: Orders = await this.gateway.getAll('orders');
+        return result;
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
-  async getOrderById(id: number) {
+  async findById(id: number) {
     try {
       const result = await this.gateway.getById('orders', id);
       return result.data;
@@ -27,7 +41,7 @@ export class OrderService {
   }
   async updateOrder(id: number, item: Orders) {
     try {
-      const order = await this.getOrderById(id);
+      const order = await this.findById(id);
       if (!order) {
         throw new BadRequestException('is not Order in Database');
       }
@@ -39,7 +53,7 @@ export class OrderService {
   }
   async deleteY(id: number) {
     try {
-      const order = await this.getOrderById(id);
+      const order = await this.findById(id);
       if (!order) {
         throw new BadRequestException('is not Order in Database');
       }
@@ -51,7 +65,7 @@ export class OrderService {
   }
   async deleteN(id: number) {
     try {
-      const order = await this.getOrderById(id);
+      const order = await this.findById(id);
       if (!order) {
         throw new BadRequestException('is not Order in Database');
       }
