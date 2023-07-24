@@ -1,6 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { GatewayService } from '../gateway/gateway.service';
-import { Products } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import {
+  Categories,
+  Products,
+} from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
 import { CachingService } from '../caching/caching.service';
 import { Filters } from 'src/models/searchproduct.model';
 
@@ -16,8 +19,8 @@ export class ProductService {
         await this.caches.getRedisProducts(),
       );
       if (!result) {
-        const result: Products[] = await this.gateway.getAll('products');
-        return result;
+        const caches: Products[] = await this.gateway.getAll('products');
+        return caches;
       } else {
         return result;
       }
@@ -38,14 +41,33 @@ export class ProductService {
       throw new BadRequestException(error);
     }
   }
-  // async search(item: string) {
-  //   try {
-  //     const result = await this.gateway.search('products', item);
-  //     return result.data;
-  //   } catch (error) {
-  //     throw new BadRequestException(error);
-  //   }
-  // }
+  async findCatagory() {
+    try {
+      const cache: Categories[] | undefined = JSON.parse(
+        await this.caches.getRedisProducts(),
+      );
+      if (!cache) {
+        const result = await this.gateway.getAll('products', {
+          category: 'categories',
+        });
+        return result;
+      } else {
+        return cache;
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async craeteCatagory(item: Categories) {
+    try {
+      const result = await this.gateway.create('products', item, {
+        category: 'categories',
+      });
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
   async search(filterTemp: Filters<Products>) {
     try {
       const result = await this.findAll();
@@ -59,16 +81,17 @@ export class ProductService {
             if (typeof filterTemp.data[key] === 'string') {
               const ProductsSearch = filter[key].toLowerCase();
               const searchName = filterTemp.data[key].toLowerCase();
-              console.log(searchName);
               return ProductsSearch.indexOf(searchName) !== -1;
-            }
-            if (typeof filterTemp.data[key] === 'number') {
+            } else if (
+              Number.parseFloat(filterTemp.data[key]) ||
+              Number.parseInt(filterTemp.data[key])
+            ) {
               return filter[key] === filterTemp.data[key];
-            }
-            if (typeof filterTemp.data[key] === 'boolean') {
+            } else if (typeof filterTemp.data[key] === 'number') {
               return filter[key] === filterTemp.data[key];
-            }
-            if (Date.parse(filterTemp.data[key])) {
+            } else if (typeof filterTemp.data[key] === 'boolean') {
+              return filter[key] === filterTemp.data[key];
+            } else if (Date.parse(filterTemp.data[key])) {
               return filter[key] === new Date(filterTemp.data[key]);
             }
           }
@@ -88,9 +111,25 @@ export class ProductService {
   async create(data: Products) {
     try {
       const result = await this.gateway.create('products', data);
+      if (result) {
+        await this.gateway.getAll('products');
+        return result;
+      }
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
+    }
+  }
+  async createProducts(item: any) {
+    try {
+      const result = await this.gateway.creates(item);
+      if (result) {
+        await this.gateway.getAll('products');
+        return result;
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error);
     }
   }
   async deleteY(id: number) {
@@ -111,7 +150,7 @@ export class ProductService {
   }
   async update(id: number, data: Products) {
     try {
-      const products = await this.findById(id);
+      const products = await this.gateway.getById('products', id);
       if (!products) {
         throw new BadRequestException('is not Product in Database');
       }
@@ -120,5 +159,16 @@ export class ProductService {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  async uploadImage(id: number, image: string) {
+    try {
+      const product = await this.findById(id);
+      if (!product) {
+        throw new BadRequestException('in no Product in Database');
+      }
+      const uploadImage = await this.gateway.update('products', id, image);
+      return uploadImage.data;
+    } catch (error) {}
   }
 }

@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GatewayConfig } from 'src/configs/gateway_config';
-import { WooRestApiEndpoint } from 'woocommerce-rest-ts-api';
+import { WooRestApiEndpoint, WooRestApiParams } from 'woocommerce-rest-ts-api';
 import { CachingService } from '../caching/caching.service';
+
 @Injectable()
 export class GatewayService {
   constructor(@Inject('caching') private readonly caches: CachingService) {}
   private endPoint = GatewayConfig.End_point;
 
-  async getAll(path: WooRestApiEndpoint) {
-    const result = await this.endPoint.get(path);
+  async getAll(path: WooRestApiEndpoint, option?: Partial<WooRestApiParams>) {
+    const result = await this.endPoint.get(path, option);
     // this.redis.set(path, JSON.stringify(result.data), 'EX', 60);
     this.caches.setRedis(path, JSON.stringify(result.data), 120);
     return result.data;
@@ -24,9 +25,17 @@ export class GatewayService {
       search: item,
     });
   }
-  async create(path: WooRestApiEndpoint, item: any) {
-    const result = await this.endPoint.post(path, item);
+  async create(
+    path: WooRestApiEndpoint,
+    item: any,
+    option?: Partial<WooRestApiParams>,
+  ) {
+    const result = await this.endPoint.post(path, item, option);
     await this.getAll(path);
+    return result.data;
+  }
+  async creates(item: any) {
+    const result = await this.endPoint.post('products/batch', item);
     return result.data;
   }
   async deleteForce(path: WooRestApiEndpoint, id: number) {

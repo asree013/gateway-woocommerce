@@ -1,10 +1,17 @@
-import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
-@Injectable()
-export class ImageComfig implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    // "value" is an object containing the file's attributes and metadata
-    const oneKb = 1000;
-    return value.size < oneKb;
-  }
+export const storage = diskStorage({
+  destination: './uploads',
+  filename: (req, file, callback) => {
+    callback(null, generateFilename(file));
+  },
+});
+
+function generateFilename(file) {
+  const date = new Date();
+  const iso = date.toISOString();
+  const todays = iso.replace('T', '-T').replace(':', '-').replace(':', '-');
+  const splits = todays.split(/[.,!,?]/);
+  return `${splits[0]}s${extname(file.originalname)}`;
 }

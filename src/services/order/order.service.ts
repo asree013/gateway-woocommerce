@@ -15,7 +15,7 @@ export class OrderService {
         await this.caches.getRedisOrders(),
       );
       if (!result) {
-        const result: Orders = await this.gateway.getAll('orders');
+        const result: Orders[] = await this.gateway.getAll('orders');
         return result;
       }
       return result;
@@ -25,8 +25,13 @@ export class OrderService {
   }
   async findById(id: number) {
     try {
-      const result = await this.gateway.getById('orders', id);
-      return result.data;
+      const result: Orders[] | undefined = await this.findAll();
+      if (!result) {
+        const result = await this.gateway.getById('orders', id);
+        return result;
+      } else {
+        return result.find((f) => f.id === id);
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -34,7 +39,7 @@ export class OrderService {
   async createOrder(item: Orders) {
     try {
       const result = await this.gateway.create('orders', item);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -53,24 +58,16 @@ export class OrderService {
   }
   async deleteY(id: number) {
     try {
-      const order = await this.findById(id);
-      if (!order) {
-        throw new BadRequestException('is not Order in Database');
-      }
       const result = await this.gateway.deleteForce('orders', id);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
   async deleteN(id: number) {
     try {
-      const order = await this.findById(id);
-      if (!order) {
-        throw new BadRequestException('is not Order in Database');
-      }
       const result = await this.gateway.unDeleteForce('orders', id);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }

@@ -19,8 +19,8 @@ export class OrderController {
     return this.service.findAll();
   }
   @Get(':id')
-  findById(id: number) {
-    return this.service.findById(id);
+  findById(@Param('id') id: string) {
+    return this.service.findById(+id);
   }
   @Post()
   createOrder(@Body() item: Orders) {

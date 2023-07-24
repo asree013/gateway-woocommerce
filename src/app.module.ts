@@ -7,6 +7,12 @@ import { CouponsModule } from './coupons/coupons.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { CachingService } from './services/caching/caching.service';
+import { CustomerModule } from './customer/customer.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { ConnectDbService } from './services/connect_db/connect_db.service';
+import { BranchModule } from './branch/branch.module';
+import { AccoutsModule } from './accouts/accouts.module';
 
 @Global()
 @Module({
@@ -15,15 +21,7 @@ import { CachingService } from './services/caching/caching.service';
     OrderModule,
     PaymentGatewayModule,
     CouponsModule,
-    MulterModule.registerAsync({
-      useFactory: () => ({
-        dest: './upload',
-        fileFilter(req, file, callback) {
-          file.filename = new Date().toISOString() + '.jpeg' + file.mimetype;
-          callback(null, true);
-        },
-      }),
-    }),
+    MulterModule,
     RedisModule.forRoot({
       config: {
         host: 'localhost',
@@ -31,6 +29,13 @@ import { CachingService } from './services/caching/caching.service';
         password: 'eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81',
       },
     }),
+    CustomerModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '/uploads'),
+      serveRoot: '/images',
+    }),
+    BranchModule,
+    AccoutsModule,
   ],
   providers: [
     {
@@ -41,7 +46,11 @@ import { CachingService } from './services/caching/caching.service';
       provide: 'caching',
       useClass: CachingService,
     },
+    {
+      provide: 'connectDB',
+      useClass: ConnectDbService,
+    },
   ],
-  exports: ['gateway', MulterModule, 'caching'],
+  exports: ['gateway', MulterModule, 'caching', 'connectDB'],
 })
 export class AppModule {}
