@@ -70,6 +70,7 @@ export class ProductService {
   }
   async search(filterTemp: Filters<Products>) {
     try {
+      console.log(filterTemp);
       const result = await this.findAll();
       const data = result.filter((filter) => {
         if (!filterTemp.data) {

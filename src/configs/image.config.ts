@@ -13,5 +13,5 @@ function generateFilename(file) {
   const iso = date.toISOString();
   const todays = iso.replace('T', '-T').replace(':', '-').replace(':', '-');
   const splits = todays.split(/[.,!,?]/);
-  return `${splits[0]}s${extname(file.originalname)}`;
+  return `${splits}s${extname(file.originalname)}`;
 }

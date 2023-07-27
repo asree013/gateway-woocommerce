@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConnectDbService } from '../connect_db/connect_db.service';
 import { BranchCreate } from 'src/DTOS/barnch.dto';
-import { randomUUID } from 'crypto';
+// import { randomUUID } from 'crypto';
 
 @Injectable()
 export class BranchService {
@@ -40,7 +40,7 @@ export class BranchService {
   async findAll() {
     try {
       const query = 'SELECT * FROM external_branch';
-      const findAll = await this.connect.query(query);
+      const findAll = await this.connect.querys(query);
       return findAll;
     } catch (error) {
       throw new BadRequestException(error);
@@ -50,7 +50,7 @@ export class BranchService {
     try {
       const query = 'UPDATE external_branch SET title = ? WHERE id = ?';
       const value = [item.title, id];
-      const update = await this.connect.query(query, value);
+      const update = await this.connect.querys(query, value);
       return update;
     } catch (error) {
       throw new BadRequestException(error);
@@ -64,7 +64,7 @@ export class BranchService {
       if (find.status === 202) {
         return find;
       } else {
-        const deleted = await this.connect.query(query, value);
+        const deleted = await this.connect.querys(query, value);
         if (deleted) {
           const response = {
             status: 201,

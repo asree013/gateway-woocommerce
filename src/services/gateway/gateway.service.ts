@@ -11,7 +11,7 @@ export class GatewayService {
   async getAll(path: WooRestApiEndpoint, option?: Partial<WooRestApiParams>) {
     const result = await this.endPoint.get(path, option);
     // this.redis.set(path, JSON.stringify(result.data), 'EX', 60);
-    this.caches.setRedis(path, JSON.stringify(result.data), 120);
+    this.caches.setRedis(path, JSON.stringify(result.data), 1200);
     return result.data;
   }
   async getById(path: WooRestApiEndpoint, id: number) {

@@ -25,6 +25,15 @@ export class ProductController {
   constructor(@Inject('products') private readonly service: ProductService) {}
   path = 'http://localhost:3000/images/';
 
+  @Post('search')
+  searchInCaches(@Body() item: Filters<Products>) {
+    console.log(item);
+    try {
+      return this.service.search(item);
+    } catch (error) {
+      console.log(error);
+    }
+  }
   @Get('catagory')
   getCatagory() {
     return this.service.findCatagory();
@@ -40,14 +49,6 @@ export class ProductController {
   @Post('catagory')
   createCategory(@Body() item: Categories) {
     return this.service.craeteCatagory(item);
-  }
-  @Post('search')
-  searchInCaches(@Body() item: Filters<Products>) {
-    try {
-      return this.service.search(item);
-    } catch (error) {
-      console.log(error);
-    }
   }
   @Post()
   addProduct(@Body() item: Products) {
@@ -72,9 +73,15 @@ export class ProductController {
     return this.service.deleteN(id);
   }
   @Post('uploads')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(
+    FilesInterceptor(
+      'files', // name of the field being passed
+      10,
+      { storage },
+    ),
+  )
   uploadFile(@UploadedFiles() files: Array<Express.Multer.File>) {
-    console.log(files);
+    return files.map((r) => r.filename);
   }
   @Post('upload/:id') // API path
   @UseInterceptors(

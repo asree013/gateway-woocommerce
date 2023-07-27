@@ -13,6 +13,8 @@ import { join } from 'path';
 import { ConnectDbService } from './services/connect_db/connect_db.service';
 import { BranchModule } from './branch/branch.module';
 import { AccoutsModule } from './accouts/accouts.module';
+import { UsersModule } from './users/users.module';
+import { ImagesModule } from './images/images.module';
 
 @Global()
 @Module({
@@ -36,6 +38,8 @@ import { AccoutsModule } from './accouts/accouts.module';
     }),
     BranchModule,
     AccoutsModule,
+    UsersModule,
+    ImagesModule,
   ],
   providers: [
     {
