@@ -3,9 +3,13 @@ export class ImagesCreate {
   image: string[];
 }
 export class AccoutOnDateAndBranch {
-  date: string;
   branch_id: number;
 }
 export class AccoutOnDate {
   date: string;
+}
+
+export class AccoutSearchAdmin {
+  date: Date;
+  branch_id: string;
 }

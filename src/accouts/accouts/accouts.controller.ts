@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 import { AccoutCreate, AccoutUpdate } from 'src/DTOS/accout.dto';
 import {
-  AccoutOnDate,
-  AccoutOnDateAndBranch,
+  AccoutSearchAdmin,
   ImagesCreate,
 } from 'src/models/images.accout.model';
 import { AccoutService } from 'src/services/accout/accout.service';
@@ -19,14 +18,17 @@ import { AccoutService } from 'src/services/accout/accout.service';
 @Controller('accouts')
 export class AccoutsController {
   constructor(@Inject('accout') private readonly service: AccoutService) {}
-
-  @Post('/ondate')
-  getAccoutOnDate(@Body() item: AccoutOnDate) {
-    return this.service.findAllAccoutOnDate(item);
+  @Post('admin')
+  getAccoutAllAdmin(@Body() item: AccoutSearchAdmin) {
+    return this.service.findAllAccoutAdmin(item);
   }
-  @Post('/dateandbranch')
-  getAccoutOnDateAndBranch(@Body() item: AccoutOnDateAndBranch) {
-    return this.service.findAllAccoutFormIdBranchAndBranch(item);
+  @Get('/ondate')
+  getAccoutOnDate() {
+    return this.service.findAllAccoutOnDate();
+  }
+  @Get('/ondate/:id')
+  getAccoutOnDateAndBranch(@Param('id') id: number) {
+    return this.service.findAllAccoutFormIdBranchAndBranch(id);
   }
   @Get('/images')
   getAccoutImage() {

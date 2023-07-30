@@ -15,6 +15,7 @@ import { BranchModule } from './branch/branch.module';
 import { AccoutsModule } from './accouts/accouts.module';
 import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
+import { StockModule } from './stock/stock.module';
 
 @Global()
 @Module({
@@ -40,6 +41,7 @@ import { ImagesModule } from './images/images.module';
     AccoutsModule,
     UsersModule,
     ImagesModule,
+    StockModule,
   ],
   providers: [
     {

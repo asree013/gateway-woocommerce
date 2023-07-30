@@ -17,4 +17,7 @@ export class CachingService {
   getRedisPayment() {
     return this.redis.get('payment_gateways');
   }
+  getRedisBranch() {
+    return this.redis.get('branch');
+  }
 }

@@ -1,12 +1,14 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConnectDbService } from '../connect_db/connect_db.service';
 import { BranchCreate } from 'src/DTOS/barnch.dto';
+import { CachingService } from '../caching/caching.service';
 // import { randomUUID } from 'crypto';
 
 @Injectable()
 export class BranchService {
   constructor(
     @Inject('connectDB') private readonly connect: ConnectDbService,
+    @Inject('caching') private readonly cache: CachingService,
   ) {}
 
   async create(item: BranchCreate) {
@@ -14,7 +16,10 @@ export class BranchService {
       const query = 'INSERT INTO external_branch (title) VALUES (?)';
       const value = [item.title];
       const create = await this.connect.execute(query, value);
-      return create;
+      if (create) {
+        this.findAll();
+        return create;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -39,9 +44,15 @@ export class BranchService {
   }
   async findAll() {
     try {
-      const query = 'SELECT * FROM external_branch';
-      const findAll = await this.connect.querys(query);
-      return findAll;
+      const getCach = JSON.parse(await this.cache.getRedisBranch());
+      if (!getCach) {
+        const query = 'SELECT * FROM external_branch';
+        const findAll = await this.connect.querys(query);
+        this.cache.setRedis('branch', JSON.stringify(findAll), 1200);
+        return findAll;
+      } else {
+        return getCach;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -51,7 +62,10 @@ export class BranchService {
       const query = 'UPDATE external_branch SET title = ? WHERE id = ?';
       const value = [item.title, id];
       const update = await this.connect.querys(query, value);
-      return update;
+      if (update) {
+        this.findAll();
+        return update;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }

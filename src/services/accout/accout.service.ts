@@ -2,8 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConnectDbService } from '../connect_db/connect_db.service';
 import { AccoutCreate, AccoutUpdate } from 'src/DTOS/accout.dto';
 import {
-  AccoutOnDate,
-  AccoutOnDateAndBranch,
+  AccoutSearchAdmin,
   ImagesCreate,
 } from 'src/models/images.accout.model';
 
@@ -86,34 +85,124 @@ export class AccoutService {
       throw new BadRequestException(error);
     }
   }
-  async findAllAccoutFormIdBranchAndBranch(item: AccoutOnDateAndBranch) {
-    // const day = new Date();
-    // const test = day.getUTCDay(); วิธีการส่งฝั่ง fontend
+  async findAllAccoutFormIdBranchAndBranch(branch_id: number) {
+    const day = new Date();
+    const date = day.getUTCDate();
+    const month = day.getUTCMonth() + 1;
+    const year = day.getUTCFullYear();
     try {
       const query = `SELECT accout.*, users.user_nicename, branch.title AS br_title
       FROM external_accout AS accout
       LEFT JOIN wp_users AS users ON users.ID = accout.user_id
       LEFT JOIN external_branch AS branch ON branch.id = accout.branch_id
-      WHERE accout.create_at LIKE '%${item.date}%% AND accout.branch_id = ${item.branch_id}'
+      WHERE accout.create_at LIKE '%${year}%${month}%${date}%' AND accout.branch_id = ${branch_id}
       `;
       const searchDate = await this.connect.querys(query);
+      if (searchDate.length <= 0) {
+        const status = {
+          status: 202,
+          message: 'ยังไม่มีข้อมูลบัญชีในวันนี้',
+        };
+        return status;
+      }
       return searchDate;
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
 
-  async findAllAccoutOnDate(item: AccoutOnDate) {
-    // const day = new Date();
-    // const test = day.getUTCDay(); วิธีการส่งฝั่ง fontend
+  async findAllAccoutAdmin(item: AccoutSearchAdmin) {
+    try {
+      if (item.date && !item.branch_id) {
+        console.log('date ', item.date);
+        const query = `
+          SELECT accout.*, users.user_nicename, branch.title AS br_title
+          FROM external_accout AS accout
+          LEFT JOIN wp_users AS users ON users.ID = accout.user_id
+          LEFT JOIN external_branch AS branch ON branch.id = accout.branch_id
+          WHERE accout.create_at LIKE '%${item.date}%'
+        `;
+        const searchDate = await this.connect.querys(query);
+        if (searchDate.length <= 0) {
+          console.log(202);
+
+          const status = {
+            status: 202,
+            message: 'ยังไม่มีข้อมูลบัญชีในวันนี้',
+          };
+          return status;
+        } else {
+          console.log(201);
+          return searchDate;
+        }
+      }
+      if (item.branch_id && !item.date) {
+        console.log('branch_id ', item.branch_id);
+        // const day = new Date();
+        // const dates = day.getUTCDate();
+        // const month = day.getUTCMonth() + 1;
+        // const year = day.getUTCFullYear();
+        const query = `SELECT accout.*, users.user_nicename, branch.title AS br_title
+                        FROM external_accout AS accout
+                        LEFT JOIN wp_users AS users ON users.ID = accout.user_id
+                        LEFT JOIN external_branch AS branch ON branch.id = accout.branch_id
+                        WHERE accout.branch_id = ${item.branch_id}
+                        `;
+        const searchDate = await this.connect.querys(query);
+        if (searchDate.length <= 0) {
+          const status = {
+            status: 202,
+            message: 'ยังไม่มีข้อมูลบัญชีในวันนี้',
+          };
+          return status;
+        }
+        return searchDate;
+      }
+      if (item.date && item.branch_id) {
+        console.log('all', { branch_id: item.branch_id, date: item.date });
+        const query = `
+          SELECT accout.*, users.user_nicename, branch.title AS br_title
+          FROM external_accout AS accout
+          LEFT JOIN wp_users AS users ON users.ID = accout.user_id
+          LEFT JOIN external_branch AS branch ON branch.id = accout.branch_id
+          WHERE accout.create_at LIKE '${item.date}%' AND accout.branch_id = ${item.branch_id}
+        `;
+        const searchDate = await this.connect.querys(query);
+        if (searchDate.length <= 0) {
+          const status = {
+            status: 202,
+            message: 'ยังไม่มีข้อมูลบัญชีในวันนี้',
+          };
+          return status;
+        }
+        return searchDate;
+      }
+    } catch (error) {
+      console.log('err', error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async findAllAccoutOnDate() {
+    const day = new Date();
+    const date = day.getUTCDate();
+    const month = day.getUTCMonth() + 1;
+    const year = day.getUTCFullYear();
     try {
       const query = `SELECT accout.*, users.user_nicename, branch.title AS br_title
       FROM external_accout AS accout
       LEFT JOIN wp_users AS users ON users.ID = accout.user_id
       LEFT JOIN external_branch AS branch ON branch.id = accout.branch_id
-      WHERE accout.create_at LIKE '%${item.date}%%'
+      WHERE accout.create_at LIKE '%${year}%${month}%${date}%'
       `;
       const searchDate = await this.connect.querys(query);
+      if (searchDate.length <= 0) {
+        const status = {
+          status: 202,
+          message: 'ยังไม่มีข้อมูลบัญชีในวันนี้',
+        };
+        return status;
+      }
       return searchDate;
     } catch (error) {
       throw new BadRequestException(error);
