@@ -6,9 +6,11 @@ import {
   Inject,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
+import { Customers } from 'src/DTOS/woocommercDTO';
 import { CustomerService } from 'src/services/customer/customer.service';
-import { Customers } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { CustomersFormCreate } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
 
 @Controller('customers')
 export class CustomerController {
@@ -17,21 +19,24 @@ export class CustomerController {
   getCustomerAll() {
     return this.service.findCustomerAll();
   }
-  @Get(':id')
-  getCustomerById(@Param() id: string) {
-    return this.service.findCustomerById(+id);
-  }
   @Post()
-  //Email is uniceKey//
-  addCustomer(@Body() item: Customers) {
+  addCustomer(@Body() item: CustomersFormCreate) {
     return this.service.createCustome(item);
   }
-  @Delete(':id')
-  deleteCustomer(@Param() id: string) {
-    return this.service.deleteCustomerItem(+id);
+  @Get(':id')
+  getCustomerById(@Param('id') id: number) {
+    return this.service.findCustomerById(id);
   }
-  @Delete('un/:id')
-  unDeleteCustomer(@Param() id: string) {
-    return this.service.unDeleteCustomer(+id);
+  @Put(':id')
+  editCustomer(@Param('id') id: number, @Body() item: Customers) {
+    return this.service.updateCustomer(id, item);
   }
+  // @Delete(':id')
+  // deleteCustomer(@Param('id') id: number) {
+  //   return this.service.deleteCustomerItem(id);
+  // }
+  // @Delete('un/:id')
+  // unDeleteCustomer(@Param() id: string) {
+  //   return this.service.unDeleteCustomer(+id);
+  // }
 }

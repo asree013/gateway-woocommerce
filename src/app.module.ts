@@ -16,6 +16,10 @@ import { AccoutsModule } from './accouts/accouts.module';
 import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
 import { StockModule } from './stock/stock.module';
+import { ProviceModule } from './provice/provice.module';
+import { PackingCaseModule } from './packing_case/packing_case.module';
+import { ShippingLineModule } from './shipping_line/shipping_line.module';
+import { StockQuantityModule } from './stock-quantity/stock-quantity.module';
 
 @Global()
 @Module({
@@ -42,6 +46,10 @@ import { StockModule } from './stock/stock.module';
     UsersModule,
     ImagesModule,
     StockModule,
+    ProviceModule,
+    PackingCaseModule,
+    ShippingLineModule,
+    StockQuantityModule,
   ],
   providers: [
     {

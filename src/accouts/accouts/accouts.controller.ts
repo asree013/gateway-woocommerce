@@ -20,6 +20,7 @@ export class AccoutsController {
   constructor(@Inject('accout') private readonly service: AccoutService) {}
   @Post('admin')
   getAccoutAllAdmin(@Body() item: AccoutSearchAdmin) {
+    console.log(item);
     return this.service.findAllAccoutAdmin(item);
   }
   @Get('/ondate')
@@ -38,9 +39,9 @@ export class AccoutsController {
   getAccout() {
     return this.service.findAll();
   }
-  @Get('all')
-  getAccoutAll() {
-    return this.service.findAllAccoutFormIdBranch();
+  @Get('all/:branch_id')
+  getAccoutAll(@Param('branch_id') branch_id: number) {
+    return this.service.findAllAccoutFormIdBranch(branch_id);
   }
   @Get(':id')
   getAccoutById(@Param('id') id: number) {

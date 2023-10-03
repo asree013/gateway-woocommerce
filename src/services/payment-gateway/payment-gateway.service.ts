@@ -7,7 +7,7 @@ export class PaymentGatewayService {
   async findAll() {
     try {
       const result = await this.gateway.getAll('payment_gateways');
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -15,7 +15,7 @@ export class PaymentGatewayService {
   async findById(id: number) {
     try {
       const result = await this.gateway.getById('payment_gateways', id);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }

@@ -8,7 +8,8 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { StockCreate } from 'src/DTOS/stock.dto';
+import { StockCreate, Stocks } from 'src/DTOS/stock.dto';
+import { Filters } from 'src/models/searchproduct.model';
 import { StocksService } from 'src/services/stocks/stocks.service';
 
 @Controller('stock')
@@ -18,8 +19,13 @@ export class StockController {
   getStockAll() {
     return this.service.findAll();
   }
+  @Post('page')
+  getStockPagination(@Body() item: { page: number; pageSize: number }) {
+    return this.service.findAllByPagination(item);
+  }
   @Post()
   addStock(@Body() item: StockCreate) {
+    console.log('stock create');
     return this.service.create(item);
   }
   @Get(':id')
@@ -30,6 +36,10 @@ export class StockController {
   getStockByIdProduct(@Param('id') id: number) {
     return this.service.findByIdProduct(id);
   }
+  @Get('product/detail/:id')
+  getStockByIdProductDetail(@Param('id') id: number) {
+    return this.service.findProductAndStockById(id);
+  }
   @Put(':id')
   editStock(@Param('id') id: number, @Body() item: StockCreate) {
     return this.service.update(id, item);
@@ -37,5 +47,9 @@ export class StockController {
   @Delete(':id')
   deleteStock(@Param('id') id: number) {
     return this.service.delete(id);
+  }
+  @Post('search')
+  searchStockByKey(@Body() item: Filters<Stocks>) {
+    return this.service.search(item);
   }
 }

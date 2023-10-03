@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { OrderService } from 'src/services/order/order.service';
-import { Orders } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { Orders } from 'src/DTOS/woocommercDTO';
 
 @Controller('orders')
 export class OrderController {

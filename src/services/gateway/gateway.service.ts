@@ -11,7 +11,6 @@ export class GatewayService {
   async getAll(path: WooRestApiEndpoint, option?: Partial<WooRestApiParams>) {
     const result = await this.endPoint.get(path, option);
     // this.redis.set(path, JSON.stringify(result.data), 'EX', 60);
-    this.caches.setRedis(path, JSON.stringify(result.data), 1200);
     return result.data;
   }
   async getById(path: WooRestApiEndpoint, id: number) {
@@ -31,7 +30,6 @@ export class GatewayService {
     option?: Partial<WooRestApiParams>,
   ) {
     const result = await this.endPoint.post(path, item, option);
-    await this.getAll(path);
     return result.data;
   }
   async creates(item: any) {
@@ -39,15 +37,14 @@ export class GatewayService {
     return result.data;
   }
   async deleteForce(path: WooRestApiEndpoint, id: number) {
-    const result = await this.endPoint.delete(
+    const reslut = await this.endPoint.delete(
       path,
       { force: true },
       {
         id: id,
       },
     );
-    await this.getAll(path);
-    return result.data;
+    return reslut.data;
   }
   unDeleteForce(path: WooRestApiEndpoint, id: number) {
     return this.endPoint.delete(
@@ -58,9 +55,8 @@ export class GatewayService {
       },
     );
   }
-  update(path: WooRestApiEndpoint, id: number, data: any) {
-    return this.endPoint.put(path, data, {
-      id: id,
-    });
+  async update(path: WooRestApiEndpoint, id: number, data: any) {
+    const result = await this.endPoint.put(path, data, { id: id });
+    return result.data;
   }
 }

@@ -1,7 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConnectDbService } from '../connect_db/connect_db.service';
-import { BranchCreate } from 'src/DTOS/barnch.dto';
+import { Branch, CreateWareHouse } from 'src/DTOS/barnch.dto';
 import { CachingService } from '../caching/caching.service';
+import { Filters } from 'src/models/searchproduct.model';
 // import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -11,14 +12,22 @@ export class BranchService {
     @Inject('caching') private readonly cache: CachingService,
   ) {}
 
-  async create(item: BranchCreate) {
+  async create(item: CreateWareHouse) {
     try {
-      const query = 'INSERT INTO external_branch (title) VALUES (?)';
-      const value = [item.title];
-      const create = await this.connect.execute(query, value);
+      const query = `
+        INSERT INTO external_branch (title, address, city, province, postcode, country, email, phone, user_id) 
+        VALUES ('${item.title}', '${item.address}', '${item.city}', '${item.province}', 
+        ${item.postcode}, '${item.country}', '${item.email}', '${item.phone}', '${item.user_id}')
+      `;
+      const create = await this.connect.execute(query);
       if (create) {
-        this.findAll();
-        return create;
+        const updateCache = await this.connect.execute(
+          `SELECT * FROM external_branch`,
+        );
+        this.cache.setRedis('branch', JSON.stringify(updateCache), 1200);
+        const { insertId } = create as any;
+        const find = await this.findOne(insertId);
+        return find;
       }
     } catch (error) {
       throw new BadRequestException(error);
@@ -29,7 +38,7 @@ export class BranchService {
       const query = 'SELECT * FROM external_branch WHERE id = ?';
       const value = [id];
       const findId = await this.connect.execute(query, value);
-      if (findId.length <= 0) {
+      if (findId.length === 0) {
         const response = {
           status: 202,
           message: 'is Not a Branch in Database',
@@ -51,13 +60,20 @@ export class BranchService {
         this.cache.setRedis('branch', JSON.stringify(findAll), 1200);
         return findAll;
       } else {
+        if (getCach.length <= 0) {
+          const responese = {
+            status: 204,
+            message: 'is not Branch in Database',
+          };
+          return responese;
+        }
         return getCach;
       }
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
-  async update(item: BranchCreate, id: number) {
+  async update(item: CreateWareHouse, id: number) {
     try {
       const query = 'UPDATE external_branch SET title = ? WHERE id = ?';
       const value = [item.title, id];
@@ -86,6 +102,46 @@ export class BranchService {
           };
           return response;
         }
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async search(value: Filters<Branch>) {
+    try {
+      const result = await this.findAll();
+      const data = result.filter((filter) => {
+        if (!value.data) {
+          return filter;
+        }
+        const listKey = Object.keys(value.data);
+        if (listKey.length > 0) {
+          for (const key of listKey) {
+            if (typeof value.data[key] === 'string') {
+              const ProductsSearch = filter[key].toLowerCase();
+              const searchName = value.data[key].toLowerCase();
+              return ProductsSearch.indexOf(searchName) !== -1;
+            } else if (
+              Number.parseFloat(value.data[key]) ||
+              Number.parseInt(value.data[key])
+            ) {
+              return filter[key] === value.data[key];
+            } else if (typeof value.data[key] === 'number') {
+              return filter[key] === value.data[key];
+            } else if (typeof value.data[key] === 'boolean') {
+              return filter[key] === value.data[key];
+            } else if (Date.parse(value.data[key])) {
+              return filter[key] === new Date(value.data[key]);
+            }
+          }
+        } else {
+          return filter;
+        }
+      });
+      if (data) {
+        return data;
+      } else {
+        throw new BadRequestException('not Product in Database');
       }
     } catch (error) {
       throw new BadRequestException(error);

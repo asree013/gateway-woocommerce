@@ -25,9 +25,18 @@ export class ProductController {
   constructor(@Inject('products') private readonly service: ProductService) {}
   path = 'http://localhost:3000/images/';
 
+  @Post()
+  addProduct(@Body() item: Products) {
+    return this.service.create(item);
+  }
+  @Post('upload/image')
+  @UseInterceptors(FileInterceptor('file', { storage }))
+  uploadProductImage(@UploadedFile() file) {
+    console.log(file.filename);
+    return file;
+  }
   @Post('search')
   searchInCaches(@Body() item: Filters<Products>) {
-    console.log(item);
     try {
       return this.service.search(item);
     } catch (error) {
@@ -42,6 +51,10 @@ export class ProductController {
   getProductAll() {
     return this.service.findAll();
   }
+  @Post('page/')
+  getProductAllPaginate(@Body() page: number) {
+    return this.service.findAllPaginate(page);
+  }
   @Get(':id')
   getProductByid(@Param('id') id: string) {
     return this.service.findById(+id);
@@ -49,10 +62,6 @@ export class ProductController {
   @Post('catagory')
   createCategory(@Body() item: Categories) {
     return this.service.craeteCatagory(item);
-  }
-  @Post()
-  addProduct(@Body() item: Products) {
-    return this.service.create(item);
   }
   @Post('batch')
   addProducts(@Body() item: Products[]) {
@@ -62,6 +71,7 @@ export class ProductController {
   }
   @Put(':id')
   editProduct(@Param('id') id: number, @Body() item: Products) {
+    console.log('put product');
     return this.service.update(id, item);
   }
   @Delete(':id')

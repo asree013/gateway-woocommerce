@@ -20,4 +20,10 @@ export class CachingService {
   getRedisBranch() {
     return this.redis.get('branch');
   }
+  getRedisStocks() {
+    return this.redis.get('stocks');
+  }
+  getRedisStockPagination() {
+    return this.redis.get('stockPagination');
+  }
 }

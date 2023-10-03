@@ -1,9 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { GatewayService } from '../gateway/gateway.service';
-import {
-  Categories,
-  Products,
-} from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { Categories, Products } from '../../DTOS/woocommercDTO';
 import { CachingService } from '../caching/caching.service';
 import { Filters } from 'src/models/searchproduct.model';
 
@@ -20,7 +17,29 @@ export class ProductService {
       );
       if (!result) {
         const caches: Products[] = await this.gateway.getAll('products');
+        await this.caches.setRedis('products', JSON.stringify(caches), 1200);
         return caches;
+      } else {
+        return result;
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async findAllPaginate(page: number) {
+    try {
+      page = 1;
+      const pageSize = 5;
+      const startIndex = page - 1 * pageSize;
+      const endIndex = startIndex + pageSize;
+
+      const result: Products[] | undefined = JSON.parse(
+        await this.caches.getRedisProducts(),
+      );
+      if (!result) {
+        const caches: Products[] = await this.gateway.getAll('products');
+        const paginatedData = caches.slice(startIndex, endIndex);
+        return paginatedData;
       } else {
         return result;
       }
@@ -30,13 +49,8 @@ export class ProductService {
   }
   async findById(id: number) {
     try {
-      const result: Products[] | undefined = await this.findAll();
-      if (!result) {
-        const result = await this.gateway.getById('products', id);
-        return result;
-      } else {
-        return result.find((f) => f.id === id);
-      }
+      const result = await this.gateway.getById('products', id);
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -110,15 +124,15 @@ export class ProductService {
     }
   }
   async create(data: Products) {
+    console.log('create product');
+    console.log(data);
     try {
       const result = await this.gateway.create('products', data);
-      if (result) {
-        await this.gateway.getAll('products');
-        return result;
-      }
+      const findAll = await this.gateway.getAll('products');
+      await this.caches.setRedis('products', JSON.stringify(findAll), 120);
       return result;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(error);
     }
   }
   async createProducts(item: any) {
@@ -135,8 +149,13 @@ export class ProductService {
   }
   async deleteY(id: number) {
     try {
-      const result = await this.gateway.deleteForce('products', id);
-      return result.data;
+      const deleted = await this.gateway.deleteForce('products', id);
+      if (deleted) {
+        const result = await this.gateway.getAll('products');
+        await this.caches.setRedis('products', JSON.stringify(result), 120);
+        return deleted;
+      }
+      return;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -144,19 +163,20 @@ export class ProductService {
   async deleteN(id: number) {
     try {
       const result = await this.gateway.deleteForce('products', id);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
   async update(id: number, data: Products) {
     try {
-      const products = await this.gateway.getById('products', id);
-      if (!products) {
-        throw new BadRequestException('is not Product in Database');
-      }
       const update = await this.gateway.update('products', id, data);
-      return update;
+      const find = await this.gateway.getAll('products');
+      await this.caches.setRedis('products', JSON.stringify(find), 120);
+      if (update) {
+        console.log('updated');
+        return update;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }

@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { GatewayService } from '../gateway/gateway.service';
-import { Orders } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { Orders } from 'src/DTOS/woocommercDTO';
 import { CachingService } from '../caching/caching.service';
 
 @Injectable()
@@ -57,8 +57,9 @@ export class OrderService {
     }
   }
   async deleteY(id: number) {
+    console.log('ser', id);
     try {
-      const result = await this.gateway.deleteForce('orders', id);
+      const result = await this.gateway.deleteForce('orders', Number(id));
       return result;
     } catch (error) {
       throw new BadRequestException(error);
