@@ -431,6 +431,17 @@ export interface OrdersRefunds {
   line_items: Partial<Orders_Refunds_Line_Items>[];
   api_refund: boolean;
 }
+export interface CreateProduct {
+  name: string;
+  description: string;
+  manage_stock: boolean;
+  stock_quantity: number;
+  images: [
+    {
+      src: string
+    }
+  ]
+}
 export interface Products {
   id: number;
   name: string;

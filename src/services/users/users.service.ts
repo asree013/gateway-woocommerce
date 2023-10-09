@@ -1,6 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConnectDbService } from '../connect_db/connect_db.service';
 import { BranchCreateForUser } from 'src/DTOS/barnch.dto';
+import { Filters } from 'src/models/searchproduct.model';
+import { Users } from 'src/DTOS/users.dto';
 
 @Injectable()
 export class UsersService {
@@ -9,10 +11,9 @@ export class UsersService {
   ) {}
 
   async getIdAndStatusUser(email: string) {
-    console.log('serviec', email);
     try {
       const query =
-        'SELECT wp_users.ID, wp_users.user_status FROM wp_users WHERE wp_users.user_email = ?';
+        'SELECT * FROM wp_users WHERE wp_users.user_email = ?';
       const value = [email];
       const find = await this.connect.execute(query, value);
       return find[0];
@@ -32,11 +33,13 @@ export class UsersService {
   async findUserById(id: number) {
     try {
       const query = `
-      SELECT wwc.first_name, wwc.last_name
-      FROM wp_wc_customer_lookup AS wwc
-      WHERE wwc.user_id = ?`;
+      select users.user_nicename
+      from wp_users as users
+      where users.ID = ?`
       const value = [id];
       const result = await this.connect.execute(query, value);
+      console.log(result[0]);
+      
       return result[0];
     } catch (error) {
       throw new BadRequestException(error);
@@ -93,10 +96,10 @@ export class UsersService {
   async findBranchByBranchId(branch_id: number) {
     try {
       const query = `
-        SELECT eub.*, users.first_name, users.last_name, users.email
-        FROM external_users_branch AS eub
-        LEFT JOIN wp_wc_customer_lookup AS users ON eub.user_id = users.user_id
-        WHERE eub.branch_id = ?
+      SELECT eub.*, users.user_email, users.user_nicename, users.ID as user_id
+      FROM external_users_branch AS eub 
+      LEFT JOIN wp_users AS users ON eub.user_id = users.ID 
+      WHERE eub.branch_id = 2;
       `;
       const value = [branch_id];
       const result = await this.connect.querys(query, value);
@@ -111,6 +114,87 @@ export class UsersService {
       }
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+  async search(value: string) {
+    console.log({
+      search: value
+    });
+    
+    try {
+      const result: Users[] = await this.findUserAll()
+      const data = result.filter(r => {
+        return r.user_email.includes(value)
+      })
+      if(data.length !== 0){
+        console.log(data);
+        return data
+      }
+      else{
+        throw new BadRequestException()
+      }
+      
+    } catch (error) {
+      throw new BadRequestException()
+    }
+  }
+  async deleteUserBranch(id: number) {
+    try {
+      const qurey = `
+      DELETE FROM external_users_branch as users WHERE users.id = ?
+      `
+      const value = [id]
+      const deletes = await this.connect.execute(qurey, value)
+      if(deletes) {
+        const findById = await this.findBranchFormUserIdByIdBranch(id)
+        return findById;
+      }
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async findBranchFormUserIdByIdBranch(branch_id: number) {
+    try {
+      const query = `
+        SELECT * 
+        FROM external_users_branch as users 
+        WHERE users.id = ?
+      `;
+      const value = [branch_id]
+      const find = await this.connect.querys(query, value);
+      return find[0];
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  async findBrachByBranch_idAndUserId(user_id: number, branch_id: number) {
+    try{
+      console.log('find');
+      const query = `
+      SELECT * FROM external_users_branch as users
+      WHERE users.user_id = ? AND users.branch_id = ?
+      `
+      const value = [user_id, branch_id]
+      const find = await this.connect.execute(query, value)
+      return find[0]
+    }
+    catch(err) {
+      throw new BadRequestException(err)
+    }
+  }
+  async updateRoleWarehouse(bracnh_id: number, user_id: number, item: BranchCreateForUser) {
+    console.log('ser update');
+    try {
+      const query = `
+      UPDATE external_users_branch as branch set branch.role = ?
+       WHERE branch.user_id = ? AND branch.branch_id = ?; 
+      `
+      const value = [item.role, user_id, bracnh_id]
+      await this.connect.execute(query, value)
+      const result = await this.findBrachByBranch_idAndUserId(user_id, bracnh_id)
+      return result
+    } catch (error) {
+      throw new BadRequestException(error)
     }
   }
 }

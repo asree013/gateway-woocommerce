@@ -1,5 +1,7 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
-import { BranchCreateForUser } from 'src/DTOS/barnch.dto';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put } from '@nestjs/common';
+import { BranchCreateForUser, CreateWareHouse } from 'src/DTOS/barnch.dto';
+import { Users } from 'src/DTOS/users.dto';
+import { Filters } from 'src/models/searchproduct.model';
 import { UsersService } from 'src/services/users/users.service';
 
 @Controller('users')
@@ -28,5 +30,27 @@ export class UsersController {
   @Get('username/:id')
   getUserById(@Param('id') id: number) {
     return this.service.findUserById(id);
+  }
+  @Get('search/:email')
+  search(@Param('email') email: string) {
+    return this.service.search(email);
+  }
+  @Delete('warehouse/:id')
+  deleteUsersWarehouse(@Param('id') idBranch: number) {
+    return this.service.deleteUserBranch(idBranch)
+  }
+  @Get("warehouse/:branch_id/user/:user_id")
+  getWarehouseByBranch_idAndUser_id(@Param('branch_id') branch_id: number, @Param('user_id') user_id: number) {
+    return this.service.findBrachByBranch_idAndUserId(user_id, branch_id)
+  }
+  @Put('warehouse/:id/user/:user_id')
+  updateRoleWarehouse(@Param('id') id: number, @Param('user_id') user_id: number, @Body() item: BranchCreateForUser) {
+    console.log({
+      id: id,
+      user_id: user_id,
+      item: item
+    });
+    
+    return this.service.updateRoleWarehouse(id, user_id, item)
   }
 }

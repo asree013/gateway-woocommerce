@@ -16,7 +16,7 @@ import { ProductService } from 'src/services/product/product.service';
 import {
   Categories,
   Products,
-} from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+} from '../../DTOS/woocommercDTO';
 import { Filters } from 'src/models/searchproduct.model';
 import { storage } from 'src/configs/image.config';
 

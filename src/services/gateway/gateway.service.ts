@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { GatewayConfig } from 'src/configs/gateway_config';
 import { WooRestApiEndpoint, WooRestApiParams } from 'woocommerce-rest-ts-api';
 import { CachingService } from '../caching/caching.service';
+import { Products } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
 
 @Injectable()
 export class GatewayService {
@@ -29,6 +30,18 @@ export class GatewayService {
     item: any,
     option?: Partial<WooRestApiParams>,
   ) {
+    console.log({
+      gateway: item
+    });
+    const result = await this.endPoint.post(path, item, option);
+    return result.data;
+  }
+  async product(
+    path: WooRestApiEndpoint,
+    item: any,
+    option?: Partial<WooRestApiParams>,
+  ) {
+    console.log(item);
     const result = await this.endPoint.post(path, item, option);
     return result.data;
   }
