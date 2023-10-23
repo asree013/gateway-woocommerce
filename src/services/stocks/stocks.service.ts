@@ -121,6 +121,20 @@ export class StocksService {
       throw new BadRequestException(error);
     }
   }
+  async findSKU(sku: string) {
+    try{
+      const query = `
+       SELECT * FROM external_stock as stocks
+       WHERE stocks.sku = ?
+      `
+      const value = [sku]
+      const result = await this.connect.execute(query, value)
+      return result
+    }
+    catch(err){
+      throw new BadRequestException(err)
+    }
+  }
   async findByIdProduct(id: number) {
     try {
       const query = `SELECT * FROM external_stock WHERE product_id = ${id} ORDER BY id DESC`;
@@ -234,4 +248,5 @@ export class StocksService {
       throw new BadRequestException(error);
     }
   }
+
 }

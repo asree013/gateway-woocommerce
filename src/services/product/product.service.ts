@@ -3,7 +3,6 @@ import { GatewayService } from '../gateway/gateway.service';
 import { Categories, Products } from '../../DTOS/woocommercDTO';
 import { CachingService } from '../caching/caching.service';
 import { Filters } from 'src/models/searchproduct.model';
-import { json } from 'stream/consumers';
 
 @Injectable()
 export class ProductService {
@@ -126,10 +125,14 @@ export class ProductService {
   }
   async create(data: Products) {     
     try {
-      const result = await this.gateway.create('products', data);
+      const result = await this.gateway.product('products', data);
       const findAll = await this.gateway.getAll('products');
       await this.caches.setRedis('products', JSON.stringify(findAll), 120);
-      return result;
+      if(result){
+        console.log('created');
+        
+        return result;
+      }
     } catch (error) {
       throw new BadRequestException(error);
     }

@@ -32,6 +32,10 @@ export class StockController {
   getStockById(@Param('id') id: number) {
     return this.service.findById(id);
   }
+  @Get('sku/:sku')
+  getStockBySKU(@Param('sku') sku: string) {
+    return this.service.findSKU(sku);
+  }
   @Get('product/:id')
   getStockByIdProduct(@Param('id') id: number) {
     return this.service.findByIdProduct(id);

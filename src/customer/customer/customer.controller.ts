@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Customers } from 'src/DTOS/woocommercDTO';
 import { CustomerService } from 'src/services/customer/customer.service';
-import { CustomersFormCreate } from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+import { CustomersFormCreate } from '../../DTOS/woocommercDTO';
 
 @Controller('customers')
 export class CustomerController {

@@ -25,13 +25,8 @@ export class OrderService {
   }
   async findById(id: number) {
     try {
-      const result: Orders[] | undefined = await this.findAll();
-      if (!result) {
-        const result = await this.gateway.getById('orders', id);
-        return result;
-      } else {
-        return result.find((f) => f.id === id);
-      }
+      const result = await this.gateway.getById('orders', id);
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -46,12 +41,10 @@ export class OrderService {
   }
   async updateOrder(id: number, item: Orders) {
     try {
-      const order = await this.findById(id);
-      if (!order) {
-        throw new BadRequestException('is not Order in Database');
-      }
+      // const find = await this.findById(id)
+      // return find
       const result = await this.gateway.update('orders', id, item);
-      return result.data;
+      return result;
     } catch (error) {
       throw new BadRequestException(error);
     }

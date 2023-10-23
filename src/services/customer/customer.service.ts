@@ -3,7 +3,7 @@ import { GatewayService } from '../gateway/gateway.service';
 import {
   Customers,
   CustomersFormCreate,
-} from 'woocommerce-rest-ts-api/dist/src/typesANDinterfaces';
+} from '../../DTOS/woocommercDTO';
 
 @Injectable()
 export class CustomerService {
