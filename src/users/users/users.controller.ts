@@ -43,6 +43,14 @@ export class UsersController {
   getWarehouseByBranch_idAndUser_id(@Param('branch_id') branch_id: number, @Param('user_id') user_id: number) {
     return this.service.findBrachByBranch_idAndUserId(user_id, branch_id)
   }
+  @Get('user-login/:username')
+  findUserLogin(@Param('username') username: string) {
+    return this.service.findUserLoginByUsername(username)
+  }
+  @Get('user-emali/:email')
+  findUserEmail(@Param('email') email: string) {
+    return this.service.findUserEmailByEmail(email)
+  }
   @Put('warehouse/:id/user/:user_id')
   updateRoleWarehouse(@Param('id') id: number, @Param('user_id') user_id: number, @Body() item: BranchCreateForUser) {
     console.log({

@@ -1,10 +1,11 @@
 const apace = 9999
 const nginx = 8082
+const mamp = 3306
 
 export default {
   host: 'localhost',
-  port: nginx,
-  user: 'admin',
-  password: '12345678',
-  database: 'pos',
+  port: mamp,
+  user: 'root',
+  password: 'root',
+  database: 'pos_v2',
 };

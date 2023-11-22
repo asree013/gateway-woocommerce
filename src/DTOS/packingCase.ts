@@ -9,7 +9,7 @@ export class PackingCase {
 }
 
 export class PackingCaseCreate {
-  pa_sku: string;
+  pc_sku: string;
   names: string;
   counts: number;
   images: string;
@@ -24,6 +24,7 @@ export class PackingCaseUpdate {
 }
 
 export class PackingCaseDetail {
+  id: number;
   pc_id: number;
   count_product_pack: number;
   count_product_item: number;

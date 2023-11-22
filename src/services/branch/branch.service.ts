@@ -60,13 +60,6 @@ export class BranchService {
         this.cache.setRedis('branch', JSON.stringify(findAll), 1200);
         return findAll;
       } else {
-        if (getCach.length <= 0) {
-          const responese = {
-            status: 204,
-            message: 'is not Branch in Database',
-          };
-          return responese;
-        }
         return getCach;
       }
     } catch (error) {

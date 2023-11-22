@@ -1,4 +1,5 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { PackingCase, PackingCaseCreate, PackingCaseDetailCreate } from 'src/DTOS/packingCase';
 import { PackingCaseService } from 'src/services/packing_case/packing_case.service';
 
 @Controller('paking-case')
@@ -9,5 +10,17 @@ export class PakingCaseController {
   @Get()
   getPackingCase() {
     return this.service.findAll();
+  }
+  @Get(':id')
+  getPackingCaseById(@Param('id') id: number){
+    return this.service.findById(id)
+  }
+  @Post()
+  addPackingCase(@Body() item: PackingCaseCreate) {
+    return this.service.create(item);
+  }
+  @Post("detail")
+  addPackingCaseDetail(@Body() item: PackingCaseDetailCreate) {
+    return this.service.createDetail(item)
   }
 }

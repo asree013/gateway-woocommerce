@@ -22,15 +22,18 @@ export class PackingCaseService {
     };
   }
   async create(item: PackingCaseCreate): Promise<PackingCase> {
+    console.log(item);
+    
     try {
       const query = `
       INSERT INTO external_packing_case (pc_sku, names, counts, images) 
-      VALUES ('?', '?', ?, '?')
+      VALUES (?, ?, ?, ?)
       `;
-      const value = [item.pa_sku, item.names, item.counts, item.images];
+      const value = [item.pc_sku, item.names, item.counts, item.images || null];
+      
       const result = await this.connect.execute(query, value);
-      const { inSertId } = result as any;
-      const findId = await this.findById(inSertId);
+      const { insertId } = result as any;
+      const findId = await this.findById(insertId);
       return findId;
     } catch (error) {
       throw new BadRequestException(error);
@@ -55,15 +58,16 @@ export class PackingCaseService {
       throw new BadRequestException(error);
     }
   }
-
   async findById(id: number): Promise<PackingCase | NotFound | any> {
+    console.log(id);
+    
     try {
       const response = {
         status: 204,
         message: 'is not item in Database',
       };
       const query = `
-            SELECT * FORM external_packing_case WHERE id = ?
+        SELECT * FROM external_packing_case WHERE id = ?
         `;
       const value = [id];
       const result = await this.connect.execute(query, value);
@@ -79,7 +83,7 @@ export class PackingCaseService {
   async findAll(): Promise<PackingCase[] | NotFound> {
     try {
       const qurey = `
-            SELECT * FORM external_packing_case
+        SELECT * FROM external_packing_case
         `;
       const result = await this.connect.querys(qurey);
       if (result.length === 0) {

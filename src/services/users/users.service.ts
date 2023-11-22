@@ -10,6 +10,41 @@ export class UsersService {
     @Inject('connectDB') private readonly connect: ConnectDbService,
   ) {}
 
+
+  async findUserLoginByUsername(username: string) {
+    
+    try {
+      const query = `
+        SELECT users.user_login
+        FROM wp_users as users 
+        WHERE users.user_login = ?
+      `
+      const value = [username]
+      const result = await this.connect.execute(query, value)
+      console.log(result);
+      
+      return result[0]
+    } catch (error) {
+      throw new BadRequestException(error)
+    }
+  }
+  async findUserEmailByEmail(email: string) {
+    
+    try {
+      const query = `
+        SELECT users.user_email
+        FROM wp_users as users 
+        WHERE users.user_email = ?
+      `
+      const value = [email]
+      const result = await this.connect.execute(query, value)
+      console.log(result);
+      
+      return result[0]
+    } catch (error) {
+      throw new BadRequestException(error)
+    }
+  }
   async getIdAndStatusUser(email: string) {
     try {
       const query =
@@ -103,15 +138,9 @@ export class UsersService {
       `;
       const value = [branch_id];
       const result = await this.connect.querys(query, value);
-      if (result.length === 0) {
-        const response = {
-          status: 204,
-          message: 'is Not User in Warehouse',
-        };
-        return response;
-      } else {
-        return result;
-      }
+      console.log(result);
+      
+      return result
     } catch (error) {
       throw new BadRequestException(error);
     }
