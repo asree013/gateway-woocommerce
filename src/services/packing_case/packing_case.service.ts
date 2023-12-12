@@ -21,7 +21,7 @@ export class PackingCaseService {
       message: 'is not item in database',
     };
   }
-  async create(item: PackingCaseCreate): Promise<PackingCase> {
+  async create(item: PackingCaseCreate, itemDetail: PackingCaseDetailCreate) {
     console.log(item);
     
     try {
@@ -33,31 +33,24 @@ export class PackingCaseService {
       
       const result = await this.connect.execute(query, value);
       const { insertId } = result as any;
-      const findId = await this.findById(insertId);
-      return findId;
+
+      const queryCreateDetail = `
+        INSERT INTO external_packing_case_detail 
+        (product_id, pc_id, count_product_pack, count_product_item)
+        VALUES (?, ?, ?, ?)
+      `;
+      const valueCreateDetail = [
+        itemDetail.product_id,
+        itemDetail.pc_id = insertId,
+        itemDetail.count_product_pack,
+        itemDetail.count_product_item,
+      ];await this.connect.execute(queryCreateDetail, valueCreateDetail);
+    
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
 
-  async createDetail(item: PackingCaseDetailCreate) {
-    try {
-      const query = `
-        INSERT INTO external_packing_case_detail 
-        (product_id, pc_id, count_product_pack, count_product_item)
-        VALUES (?, ?, ?, ?)
-      `;
-      const value = [
-        item.product_id,
-        item.pc_id,
-        item.count_product_pack,
-        item.count_product_item,
-      ];
-      const create = await this.connect.execute(query, value);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
   async findById(id: number): Promise<PackingCase | NotFound | any> {
     console.log(id);
     

@@ -251,4 +251,36 @@ export class StockQuantityService {
       throw new BadRequestException(error);
     }
   }
+  async pushingStock(sku: string, item: StockQuantity) {
+    try {
+      const findStockQuantiy = await this.findBySku(sku);
+      if(findStockQuantiy){
+        const query = `
+          UPDATE external_stock_quantity 
+          SET all_front_quantity = ?
+          WHERE id = ?
+        `;
+        const value = [item.all_front_quantity, findStockQuantiy.id];
+        await this.connect.execute(query, value);
+        const find = await this.findById(findStockQuantiy.id);
+        return find;
+      }
+    } catch (error) {
+      throw new BadRequestException(error)
+    }
+  }
+  async deleteBySku(sku: string) {
+    try {
+      const query = `
+        DELETE FROM external_stock_quantity WHERE external_stock_quantity.sku = ?
+      `
+      const value = [sku]
+      const result = await this.connect.execute(query, value)
+      if(result){
+        return sku
+      }
+    } catch (error) {
+      
+    }
+  }
 }

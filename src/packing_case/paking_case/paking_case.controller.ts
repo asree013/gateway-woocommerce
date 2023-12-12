@@ -16,11 +16,8 @@ export class PakingCaseController {
     return this.service.findById(id)
   }
   @Post()
-  addPackingCase(@Body() item: PackingCaseCreate) {
-    return this.service.create(item);
+  addPackingCase(@Body() item: PackingCaseCreate, itemDetail: PackingCaseDetailCreate) {
+    return this.service.create(item, itemDetail);
   }
-  @Post("detail")
-  addPackingCaseDetail(@Body() item: PackingCaseDetailCreate) {
-    return this.service.createDetail(item)
-  }
+  
 }

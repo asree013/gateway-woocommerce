@@ -53,8 +53,16 @@ export class StockQuantityController {
   deleteStockQuantity(@Param('id') id: number) {
     return this.service.delete(id);
   }
+  @Delete('by/:sku')
+  deleteStockQuantityBySku(@Param('sku') sku: string) {
+    return this.service.deleteBySku(sku)
+  }
   @Post('inventory/:sku')
   inventoryUpdate(@Param('sku') sku: string, @Body() item: StockQuantity) {
     return this.service.inventoryUpdate(sku, item);
+  }
+  @Post('pushing/:sku')
+  puchingStockQuantity(@Param('sku') sku: string, @Body() item: StockQuantity){
+    return this.service.pushingStock(sku, item)
   }
 }
